@@ -5,19 +5,22 @@ class GameState
     @board = [0, 0, 0,
               0, 0, 0,
               0, 0, 0]
+    @save = nil
+    @winner = nil
   end
 
   # Will determine if it's a winning state
 
   def winner?
-    b = GameState.bin_converter(@board)
-    @@WINNER_STATES.any? do |a|
-      a & b == a
-    end
+    return @winner if @winner
+
+    b = to_i
+    @winner = @@WINNER_STATES.any? { |a| a & b == a }
   end
 
   def play(cell)
     @board[cell] = 1
+    @winner = nil
   end
 
   def valid_move?(cell)
@@ -28,6 +31,21 @@ class GameState
     @board.each_with_index { |state, index| str[index] = token if state == 1 }
     str
   end
+
+  def store_state
+    @save = @board.clone
+  end
+
+  def restore_state
+    @board = @save.clone
+    @winner = nil
+  end
+
+  def to_i
+    GameState.bin_converter(@board)
+  end
+
+  # Class methods and constants
 
   def self.bin_converter(state)
     state.reduce(0) { |acc, value| acc * 2 + value }
